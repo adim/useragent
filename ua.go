@@ -57,8 +57,8 @@ const (
 	Mozilla          = "Mozilla"
 	Msie             = "MSIE"
 	SamsungBrowser   = "Samsung Browser"
-	LGBrowser         = "LG Browser"
-	MiTVBrowser       = "Mi TV Browser"
+	LGBrowser        = "LG Browser"
+	MiTVBrowser      = "Mi TV Browser"
 
 	GoogleAdsBot        = "Google Ads Bot"
 	Googlebot           = "Googlebot"
@@ -787,14 +787,14 @@ func (p *properties) findAndroidDevice(startIndex int) string {
 // isSmartTVDevice checks if the user agent string contains patterns indicating a Smart TV device
 func isSmartTVDevice(userAgent string) bool {
 	smartTVPatterns := []string{
-		"AFTSSS",      // Amazon Fire TV Stick
-		"AFTBOXE1",    // Amazon Fire TV Box
-		"AFTGAZL",     // Amazon Fire TV Cube
-		"OLED TV",     // Sony OLED TV
-		"Chromecast",  // Google Chromecast
-		"MiTV-AFKR0",  // Xiaomi Mi TV
-		"H96 Max",     // H96 Max Android TV box
-		"RK3318",      // Rockchip RK3318 Android TV box
+		"AFTSSS",     // Amazon Fire TV Stick
+		"AFTBOXE1",   // Amazon Fire TV Box
+		"AFTGAZL",    // Amazon Fire TV Cube
+		"OLED TV",    // Sony OLED TV
+		"Chromecast", // Google Chromecast
+		"MiTV-AFKR0", // Xiaomi Mi TV
+		"H96 Max",    // H96 Max Android TV box
+		"RK3318",     // Rockchip RK3318 Android TV box
 	}
 
 	// Check for individual Smart TV patterns

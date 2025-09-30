@@ -317,29 +317,6 @@ func Parse(userAgent string) UserAgent {
 		ua.Mobile = tokens.existsAny(Mobile, MobileSafari)
 		ua.Bot = true
 
-	
-	case tokens.exists("SamsungBrowser") && tokens.exists("TV"):
-		ua.Name = "Samsung TV Browser"
-		ua.Version = tokens.get("SamsungBrowser")
-		ua.Device = "Smart TV"
-		// Skip the rest of browser detection
-		return ua
-
-	case tokens.exists("SMART-TV") && tokens.exists("Tizen"):
-		ua.Name = "Samsung TV Browser"
-		ua.Version = tokens.get("Safari")
-		ua.Device = "Smart TV"
-		// Skip the rest of browser detection
-		return ua
-
-	case tokens.exists("SMART-TV") && !tokens.exists("Tizen"):
-		// Handle newer Tizen user agents that don't explicitly mention Tizen
-		ua.Name = "Samsung TV Browser"
-		ua.Version = tokens.findBestMatchVersion()
-		ua.Device = "Smart TV"
-		// Skip the rest of browser detection
-		return ua
-
 	case tokens.get("SamsungBrowser") != "":
 		ua.Name = SamsungBrowser
 		ua.Version = tokens.get("SamsungBrowser")

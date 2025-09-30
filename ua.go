@@ -198,8 +198,11 @@ func Parse(userAgent string) UserAgent {
 				ua.Version = tokens.get("SamsungBrowser")
 			} else {
 				// Handle newer Tizen format like "108.0.5359.1/8.0"
-				if version := tokens.get("108.0.5359.1"); version != "" {
-					ua.Version = "108.0.5359.1"
+				// Extract version from user agent string using regex pattern
+				re := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)/\d+\.\d+`)
+				matches := re.FindStringSubmatch(ua.String)
+				if len(matches) >= 2 {
+					ua.Version = matches[1]
 				}
 			}
 		}

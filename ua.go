@@ -40,6 +40,7 @@ const (
 	Harmony        = "Harmony"
 	WebOS          = "webOS"
 	Tizen          = "Tizen"
+	SmartTVOS      = "SmartTV"
 
 	Opera            = "Opera"
 	OperaMini        = "Opera Mini"
@@ -91,13 +92,16 @@ func Parse(userAgent string) UserAgent {
 	// OS lookup
 	switch {
 	// Smart TV OS detection - check these first
-	case tokens.exists("Web0S"):
+	case tokens.exists("Web0S"), tokens.exists("WebOS"):
 		ua.OS = WebOS
 		ua.OSVersion = tokens.get("Web0S")
+		if ua.OSVersion == "" {
+			ua.OSVersion = tokens.get("WebOS")
+		}
 		ua.Device = "Smart TV"
 
 	case tokens.exists("SmartTV"):
-		ua.OS = "SmartTV"
+		ua.OS = SmartTVOS
 		ua.Device = "Smart TV"
 
 	case tokens.exists(Android):

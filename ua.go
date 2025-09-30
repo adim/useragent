@@ -162,15 +162,17 @@ func Parse(userAgent string) UserAgent {
 	}
 
 	switch {
-	case strings.Contains(ua.String, "AFTSSS") || strings.Contains(ua.String, "AFTBOXE1") || strings.Contains(ua.String, "AFTGAZL") || strings.Contains(ua.String, "OLED TV") || strings.Contains(ua.String, "Chromecast") || strings.Contains(ua.String, "MiTV-AFKR0") || strings.Contains(ua.String, "H96 Max") || strings.Contains(ua.String, "RK3318") || (strings.Contains(ua.String, "SMART-TV") && strings.Contains(ua.String, "Tizen")):
+	case isSmartTVDevice(ua.String):
 		uaString := ua.String
 		ua.Device = "Smart TV"
-		if strings.Contains(uaString, "AFTSSS") || strings.Contains(uaString, "AFTBOXE1") || strings.Contains(uaString, "AFTGAZL") {
+
+		// Determine Smart TV type and set appropriate properties
+		if isAmazonFireTV(uaString) {
 			ua.OS = Android
 			ua.OSVersion = tokens.get("Android")
 			ua.Name = "Amazon Fire TV Browser"
 			ua.Version = tokens.get("Chrome")
-		} else if strings.Contains(uaString, "OLED TV") || strings.Contains(uaString, "H96 Max") || strings.Contains(uaString, "RK3318") {
+		} else if isAndroidTVBox(uaString) {
 			ua.OS = Android
 			ua.OSVersion = tokens.get("Android")
 			ua.Name = "Android TV Browser"
@@ -775,4 +777,60 @@ func (p *properties) findAndroidDevice(startIndex int) string {
 		}
 	}
 	return ""
+}
+
+// isSmartTVDevice checks if the user agent string contains patterns indicating a Smart TV device
+func isSmartTVDevice(userAgent string) bool {
+	smartTVPatterns := []string{
+		"AFTSSS",      // Amazon Fire TV Stick
+		"AFTBOXE1",    // Amazon Fire TV Box
+		"AFTGAZL",     // Amazon Fire TV Cube
+		"OLED TV",     // Sony OLED TV
+		"Chromecast",  // Google Chromecast
+		"MiTV-AFKR0",  // Xiaomi Mi TV
+		"H96 Max",     // H96 Max Android TV box
+		"RK3318",      // Rockchip RK3318 Android TV box
+	}
+
+	// Check for individual Smart TV patterns
+	for _, pattern := range smartTVPatterns {
+		if strings.Contains(userAgent, pattern) {
+			return true
+		}
+	}
+
+	// Check for Tizen Smart TVs
+	return strings.Contains(userAgent, "SMART-TV") && strings.Contains(userAgent, "Tizen")
+}
+
+// isAmazonFireTV checks if the user agent string indicates an Amazon Fire TV device
+func isAmazonFireTV(userAgent string) bool {
+	fireTVPatterns := []string{
+		"AFTSSS",   // Amazon Fire TV Stick
+		"AFTBOXE1", // Amazon Fire TV Box
+		"AFTGAZL",  // Amazon Fire TV Cube
+	}
+
+	for _, pattern := range fireTVPatterns {
+		if strings.Contains(userAgent, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
+// isAndroidTVBox checks if the user agent string indicates an Android TV box device
+func isAndroidTVBox(userAgent string) bool {
+	androidTVPatterns := []string{
+		"OLED TV", // Sony OLED TV
+		"H96 Max", // H96 Max Android TV box
+		"RK3318",  // Rockchip RK3318 Android TV box
+	}
+
+	for _, pattern := range androidTVPatterns {
+		if strings.Contains(userAgent, pattern) {
+			return true
+		}
+	}
+	return false
 }

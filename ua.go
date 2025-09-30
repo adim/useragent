@@ -38,6 +38,8 @@ const (
 	BlackBerry     = "BlackBerry"
 	CrOS           = "CrOS"
 	Harmony        = "Harmony"
+	WebOS          = "webOS"
+	Tizen          = "Tizen"
 
 	Opera            = "Opera"
 	OperaMini        = "Opera Mini"
@@ -54,6 +56,8 @@ const (
 	Mozilla          = "Mozilla"
 	Msie             = "MSIE"
 	SamsungBrowser   = "Samsung Browser"
+	LGBrowser         = "LG Browser"
+	MiTVBrowser       = "Mi TV Browser"
 
 	GoogleAdsBot        = "Google Ads Bot"
 	Googlebot           = "Googlebot"
@@ -86,6 +90,21 @@ func Parse(userAgent string) UserAgent {
 
 	// OS lookup
 	switch {
+	// Smart TV OS detection - check these first
+	case tokens.exists("Web0S"):
+		ua.OS = WebOS
+		ua.OSVersion = tokens.get("Web0S")
+		ua.Device = "Smart TV"
+
+	case strings.Contains(ua.String, "Tizen"):
+		ua.OS = Tizen
+		ua.OSVersion = tokens.get("Tizen")
+		ua.Device = "Smart TV"
+
+	case tokens.exists("SmartTV"):
+		ua.OS = "SmartTV"
+		ua.Device = "Smart TV"
+
 	case tokens.exists(Android):
 		ua.OS = Android
 		var osIndex int
@@ -120,6 +139,12 @@ func Parse(userAgent string) UserAgent {
 		ua.OSVersion = tokens.findMacOSVersion()
 		ua.Desktop = true
 
+	// Smart TV OS detection - check these before Linux
+	case strings.Contains(ua.String, "Tizen"):
+		ua.OS = Tizen
+		ua.OSVersion = tokens.get("Tizen")
+		ua.Device = "Smart TV"
+
 	case tokens.exists(Linux):
 		ua.OS = Linux
 		ua.OSVersion = tokens.get(Linux)
@@ -147,6 +172,50 @@ func Parse(userAgent string) UserAgent {
 	}
 
 	switch {
+	case strings.Contains(ua.String, "AFTSSS") || strings.Contains(ua.String, "AFTBOXE1") || strings.Contains(ua.String, "AFTGAZL") || strings.Contains(ua.String, "OLED TV") || strings.Contains(ua.String, "Chromecast") || strings.Contains(ua.String, "MiTV-AFKR0") || strings.Contains(ua.String, "H96 Max") || strings.Contains(ua.String, "RK3318") || (strings.Contains(ua.String, "SMART-TV") && strings.Contains(ua.String, "Tizen")):
+		uaString := ua.String
+		ua.Device = "Smart TV"
+		if strings.Contains(uaString, "AFTSSS") || strings.Contains(uaString, "AFTBOXE1") || strings.Contains(uaString, "AFTGAZL") {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = "Amazon Fire TV Browser"
+			ua.Version = tokens.get("Chrome")
+		} else if strings.Contains(uaString, "OLED TV") || strings.Contains(uaString, "H96 Max") || strings.Contains(uaString, "RK3318") {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = "Android TV Browser"
+			// Handle both Chrome-based and Firefox-based Android TV devices
+			if chromeVersion := tokens.get("Chrome"); chromeVersion != "" {
+				ua.Version = chromeVersion
+			} else if firefoxVersion := tokens.get("Firefox"); firefoxVersion != "" {
+				ua.Version = firefoxVersion
+			}
+		} else if strings.Contains(uaString, "Chromecast") {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = "Chromecast"
+			ua.Version = tokens.get("Chrome")
+		} else if strings.Contains(uaString, "MiTV-AFKR0") {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = MiTVBrowser
+			ua.Version = tokens.get("Chrome")
+		} else if strings.Contains(uaString, "SMART-TV") && strings.Contains(uaString, "Tizen") {
+			ua.OS = Tizen
+			ua.OSVersion = tokens.get("Tizen")
+			ua.Name = "Samsung TV Browser"
+			if tokens.exists("SamsungBrowser") {
+				ua.Version = tokens.get("SamsungBrowser")
+			} else {
+				// Handle newer Tizen format like "108.0.5359.1/8.0"
+				if version := tokens.get("108.0.5359.1"); version != "" {
+					ua.Version = "108.0.5359.1"
+				}
+			}
+		}
+		// Skip the rest of browser detection
+		return ua
+
 	case tokens.exists(Googlebot):
 		ua.Name = Googlebot
 		ua.Version = tokens.get(Googlebot)
@@ -255,6 +324,29 @@ func Parse(userAgent string) UserAgent {
 		ua.Mobile = tokens.existsAny(Mobile, MobileSafari)
 		ua.Bot = true
 
+	
+	case tokens.exists("SamsungBrowser") && tokens.exists("TV"):
+		ua.Name = "Samsung TV Browser"
+		ua.Version = tokens.get("SamsungBrowser")
+		ua.Device = "Smart TV"
+		// Skip the rest of browser detection
+		return ua
+
+	case tokens.exists("SMART-TV") && tokens.exists("Tizen"):
+		ua.Name = "Samsung TV Browser"
+		ua.Version = tokens.get("Safari")
+		ua.Device = "Smart TV"
+		// Skip the rest of browser detection
+		return ua
+
+	case tokens.exists("SMART-TV") && !tokens.exists("Tizen"):
+		// Handle newer Tizen user agents that don't explicitly mention Tizen
+		ua.Name = "Samsung TV Browser"
+		ua.Version = tokens.findBestMatchVersion()
+		ua.Device = "Smart TV"
+		// Skip the rest of browser detection
+		return ua
+
 	case tokens.get("SamsungBrowser") != "":
 		ua.Name = SamsungBrowser
 		ua.Version = tokens.get("SamsungBrowser")
@@ -306,6 +398,11 @@ func Parse(userAgent string) UserAgent {
 		ua.Version = tokens.get("HuaweiBrowser")
 		ua.Mobile = tokens.existsAny(Mobile, MobileSafari)
 
+	case tokens.get("LG Browser") != "":
+		ua.Name = LGBrowser
+		ua.Version = tokens.get("LG Browser")
+		ua.Device = "Smart TV"
+
 	case tokens.exists(BlackBerry):
 		ua.Name = BlackBerry
 		ua.Version = tokens.get(Version)
@@ -315,6 +412,7 @@ func Parse(userAgent string) UserAgent {
 		ua.Version = tokens.get(NetFront)
 		ua.Mobile = true
 
+	
 	// if Chrome and Safari defined, find any other token sent descr
 	case tokens.exists(Chrome) && tokens.exists(Safari):
 		name := tokens.findBestMatch(true)
@@ -622,6 +720,25 @@ func (p properties) findInstagramVersion() string {
 			}
 		}
 
+	}
+	return ""
+}
+
+// findBestMatchVersion from the rest of the bunch
+func (p properties) findBestMatchVersion() string {
+	for _, prop := range p.list {
+		switch prop.Key {
+		case Chrome, Firefox, Safari, Version, Mobile, MobileSafari, Mozilla, "AppleWebKit", WindowsNT, WindowsPhoneOS, Android, "Macintosh", Linux, "GSA", CrOS, Tablet, "OpenHarmony":
+		default:
+			// Check if it looks like a version number
+			if strings.Contains(prop.Value, ".") && len(prop.Value) > 3 {
+				return prop.Value
+			}
+			// Check if the key itself looks like a version
+			if strings.Contains(prop.Key, ".") && len(prop.Key) > 3 {
+				return prop.Key
+			}
+		}
 	}
 	return ""
 }

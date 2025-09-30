@@ -48,6 +48,27 @@ var testTable = [][]string{
 	{"Mozilla/5.0 (Linux; U; Android 4.3; en-us; GT-I9300 Build/JSS15J) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30", "Android browser", "4.0", "mobile", "Android"},
 	{"Mozilla/5.0 (Linux; Android 10; ONEPLUS A6003) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.0 Mobile Safari/537.36 EdgA/44.11.4.4140", ua.Edge, "44.11.4.4140", "mobile", "Android", "ONEPLUS A6003"},
 
+	// Smart TV - webOS (LG)
+	{"Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.41 (KHTML, like Gecko) Large Screen Safari/537.41 LG Browser/7.00.00(LGE; WEBOS1; 05.06.10; 1); webOS.TV-2014; LG NetCast.TV-2013 Compatible (LGE, WEBOS1, wireless)", ua.LGBrowser, "7.00.00", "tv", "webOS", "Smart TV"},
+	{"Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.41 (KHTML, like Gecko) Large Screen Safari/537.41 LG Browser/7.00.00(LGE; WEBOS1; 05.05.90; 1); webOS.TV-2014; LG NetCast.TV-2013 Compatible (LGE, WEBOS1, wireless)", ua.LGBrowser, "7.00.00", "tv", "webOS", "Smart TV"},
+
+	// Smart TV - Tizen (Samsung)
+	{"Mozilla/5.0 (SMART-TV; Linux; Tizen 2.2) AppleWebkit/538.1 (KHTML, like Gecko) SamsungBrowser/1.0 TV Safari/538.1", "Samsung TV Browser", "1.0", "tv", "Tizen", "Smart TV"},
+	{"Mozilla/5.0 (SMART-TV; LINUX; Tizen 8.0) AppleWebKit/537.36 (KHTML, like Gecko) 108.0.5359.1/8.0 TV Safari/537.36", "Samsung TV Browser", "108.0.5359.1", "tv", "Tizen", "Smart TV"},
+
+	// Smart TV - Android TV (Amazon Fire TV, Sony OLED TV)
+	{"Mozilla/5.0 (Linux; Android 9; AFTSSS Build/PS7704.5029N; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.169 Mobile Safari/537.36", "Amazon Fire TV Browser", "136.0.7103.169", "tv", "Android", "Smart TV"},
+	{"Mozilla/5.0 (Linux; Android 11; OLED TV S9 Build/RTM5.220609.106; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.6778.39 Mobile Safari/537.36", "Android TV Browser", "131.0.6778.39", "tv", "Android", "Smart TV"},
+
+	// Smart TV - Chromecast
+	{"Mozilla/5.0 (Linux; Android 12; Chromecast HD Build/STTL.241013.003; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.68 Mobile Safari/537.36", "Chromecast", "138.0.7204.68", "tv", "Android", "Smart TV"},
+
+	// Additional Smart TV devices
+	{"Mozilla/5.0 (Linux; Android 9; AFTBOXE1 Build/PS7704.5026N; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.169 Mobile Safari/537.36", "Amazon Fire TV Browser", "136.0.7103.169", "tv", "Android", "Smart TV"},
+	{"Mozilla/5.0 (Android 14; Mobile; H96 Max RK3318_6; rv:136.0) Gecko/136.0 Firefox/134.0", "Android TV Browser", "134.0", "tv", "Android", "Smart TV"},
+	{"Mozilla/5.0 (Linux; Android 9; AFTGAZL Build/PS7704.5024N; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.169 Mobile Safari/537.36", "Amazon Fire TV Browser", "136.0.7103.169", "tv", "Android", "Smart TV"},
+	{"Mozilla/5.0 (Linux; Android 11; MiTV-AFKR0 Build/RTT0.211222.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.168 Mobile Safari/537.36 AdsVideoApp/1.0", "Mi TV Browser", "138.0.7204.168", "tv", "Android", "Smart TV"},
+
 	{"Mozilla/5.0 (Linux; Android 6.0.1; SAMSUNG SM-A310F/A310FXXU2BQB1 Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/5.4 Chrome/51.0.2704.106 Mobile Safari/537.36", "Samsung Browser", "5.4", "mobile", "Android", "SAMSUNG SM-A310F"},
 	{"Mozilla/5.0 (Linux; Android 9; LM-Q630) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36", ua.Chrome, "86.0.4240.198", "mobile", "Android", "LM-Q630"},
 	{"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/79.0.3945.147 Safari/534.24 XiaoMi/MiuiBrowser/12.11.5-gn", "Miui Browser", "12.11.5-gn", "mobile", ua.Linux},
@@ -202,6 +223,10 @@ func TestParse(t *testing.T) {
 			}
 			if test[3] == "bot" && !ua.Bot {
 				t.Error("\n", ua.String, "should be bot")
+				fmt.Printf("%+v", ua)
+			}
+			if test[3] == "tv" && !ua.IsSmartTV() {
+				t.Error("\n", ua.String, "should be smart TV")
 				fmt.Printf("%+v", ua)
 			}
 		}

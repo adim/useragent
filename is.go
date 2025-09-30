@@ -30,6 +30,21 @@ func (ua UserAgent) IsChromeOS() bool {
 	return ua.OS == ChromeOS || ua.OS == "CrOS"
 }
 
+// IsWebOS shorthand function to check if OS == webOS
+func (ua UserAgent) IsWebOS() bool {
+	return ua.OS == WebOS
+}
+
+// IsTizen shorthand function to check if OS == Tizen
+func (ua UserAgent) IsTizen() bool {
+	return ua.OS == Tizen
+}
+
+// IsSmartTV shorthand function to check if Device == Smart TV
+func (ua UserAgent) IsSmartTV() bool {
+	return ua.Device == "Smart TV"
+}
+
 // IsBlackberryOS shorthand function to check if OS == BlackBerry
 func (ua UserAgent) IsBlackberryOS() bool {
 	return ua.OS == BlackBerry
@@ -68,6 +83,36 @@ func (ua UserAgent) IsSafari() bool {
 // IsEdge shorthand function to check if Name == Edge
 func (ua UserAgent) IsEdge() bool {
 	return ua.Name == Edge
+}
+
+// IsLGBrowser shorthand function to check if Name == LG Browser
+func (ua UserAgent) IsLGBrowser() bool {
+	return ua.Name == LGBrowser
+}
+
+// IsSamsungTVBrowser shorthand function to check if Name == Samsung TV Browser
+func (ua UserAgent) IsSamsungTVBrowser() bool {
+	return ua.Name == "Samsung TV Browser"
+}
+
+// IsAmazonFireTVBrowser shorthand function to check if Name == Amazon Fire TV Browser
+func (ua UserAgent) IsAmazonFireTVBrowser() bool {
+	return ua.Name == "Amazon Fire TV Browser"
+}
+
+// IsAndroidTVBrowser shorthand function to check if Name == Android TV Browser
+func (ua UserAgent) IsAndroidTVBrowser() bool {
+	return ua.Name == "Android TV Browser"
+}
+
+// IsChromecast shorthand function to check if Name == Chromecast
+func (ua UserAgent) IsChromecast() bool {
+	return ua.Name == "Chromecast"
+}
+
+// IsMiTVBrowser shorthand function to check if Name == Mi TV Browser
+func (ua UserAgent) IsMiTVBrowser() bool {
+	return ua.Name == MiTVBrowser
 }
 
 // IsBlackBerry shorthand function to check if Name == BlackBerry

@@ -1,3 +1,3 @@
-module github.com/mileusna/useragent
+module github.com/adim/useragent
 
-go 1.14
+go 1.19

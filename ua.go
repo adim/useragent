@@ -701,24 +701,6 @@ func (p properties) findInstagramVersion() string {
 	return ""
 }
 
-// findBestMatchVersion from the rest of the bunch
-func (p properties) findBestMatchVersion() string {
-	for _, prop := range p.list {
-		switch prop.Key {
-		case Chrome, Firefox, Safari, Version, Mobile, MobileSafari, Mozilla, "AppleWebKit", WindowsNT, WindowsPhoneOS, Android, "Macintosh", Linux, "GSA", CrOS, Tablet, "OpenHarmony":
-		default:
-			// Check if it looks like a version number
-			if strings.Contains(prop.Value, ".") && len(prop.Value) > 3 {
-				return prop.Value
-			}
-			// Check if the key itself looks like a version
-			if strings.Contains(prop.Key, ".") && len(prop.Key) > 3 {
-				return prop.Key
-			}
-		}
-	}
-	return ""
-}
 
 // findBestMatch from the rest of the bunch
 // in first cycle only return key with version value

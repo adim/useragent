@@ -96,11 +96,6 @@ func Parse(userAgent string) UserAgent {
 		ua.OSVersion = tokens.get("Web0S")
 		ua.Device = "Smart TV"
 
-	case strings.Contains(ua.String, "Tizen"):
-		ua.OS = Tizen
-		ua.OSVersion = tokens.get("Tizen")
-		ua.Device = "Smart TV"
-
 	case tokens.exists("SmartTV"):
 		ua.OS = "SmartTV"
 		ua.Device = "Smart TV"
@@ -140,11 +135,6 @@ func Parse(userAgent string) UserAgent {
 		ua.Desktop = true
 
 	// Smart TV OS detection - check these before Linux
-	case strings.Contains(ua.String, "Tizen"):
-		ua.OS = Tizen
-		ua.OSVersion = tokens.get("Tizen")
-		ua.Device = "Smart TV"
-
 	case tokens.exists(Linux):
 		ua.OS = Linux
 		ua.OSVersion = tokens.get(Linux)

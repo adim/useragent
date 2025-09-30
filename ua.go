@@ -139,7 +139,7 @@ func Parse(userAgent string) UserAgent {
 		ua.OSVersion = tokens.findMacOSVersion()
 		ua.Desktop = true
 
-	// Smart TV OS detection - check these before Linux
+	// Smart TV OS detection (Tizen detection is handled later, starting at line 170)
 	case tokens.exists(Linux):
 		ua.OS = Linux
 		ua.OSVersion = tokens.get(Linux)

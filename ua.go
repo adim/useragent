@@ -205,11 +205,10 @@ func Parse(userAgent string) UserAgent {
 				ua.Version = tokens.get("SamsungBrowser")
 			} else {
 				// Handle newer Tizen format like "108.0.5359.1/8.0"
-				// Extract version from user agent string using regex pattern
+				// Extract version from user agent string using pre-compiled regex pattern
 				// Pattern matches: version.x.x.x/x.x format (e.g., "108.0.5359.1/8.0")
 				// Group 1 captures: \d+\.\d+\.\d+\.\d+ (the version number before the slash)
-				re := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)/\d+\.\d+`)
-				matches := re.FindStringSubmatch(ua.String)
+				matches := rxTizenVersion.FindStringSubmatch(ua.String)
 				if len(matches) >= 2 {
 					ua.Version = matches[1]
 				}
@@ -752,6 +751,9 @@ func (p properties) findBestMatch(withVerOnly bool) string {
 }
 
 var rxMacOSVer = regexp.MustCompile(`[_\d\.]+`)
+
+// rxTizenVersion extracts version from Tizen format like "108.0.5359.1/8.0"
+var rxTizenVersion = regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)/\d+\.\d+`)
 
 func findVersion(s string) string {
 	if ver := rxMacOSVer.FindString(s); ver != "" {

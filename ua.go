@@ -94,8 +94,9 @@ func Parse(userAgent string) UserAgent {
 	// Smart TV OS detection - check these first
 	case tokens.exists("Web0S"), tokens.exists("WebOS"):
 		ua.OS = WebOS
-		ua.OSVersion = tokens.get("Web0S")
-		if ua.OSVersion == "" {
+		if version := tokens.get("Web0S"); version != "" {
+			ua.OSVersion = version
+		} else {
 			ua.OSVersion = tokens.get("WebOS")
 		}
 		ua.Device = "Smart TV"

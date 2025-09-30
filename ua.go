@@ -205,6 +205,8 @@ func Parse(userAgent string) UserAgent {
 			} else {
 				// Handle newer Tizen format like "108.0.5359.1/8.0"
 				// Extract version from user agent string using regex pattern
+				// Pattern matches: version.x.x.x/x.x format (e.g., "108.0.5359.1/8.0")
+				// Group 1 captures: \d+\.\d+\.\d+\.\d+ (the version number before the slash)
 				re := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)/\d+\.\d+`)
 				matches := re.FindStringSubmatch(ua.String)
 				if len(matches) >= 2 {

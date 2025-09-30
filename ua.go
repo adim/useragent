@@ -701,7 +701,6 @@ func (p properties) findInstagramVersion() string {
 	return ""
 }
 
-
 // findBestMatch from the rest of the bunch
 // in first cycle only return key with version value
 // if withVerValue is false, do another cycle and return any token

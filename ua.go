@@ -38,6 +38,9 @@ const (
 	BlackBerry     = "BlackBerry"
 	CrOS           = "CrOS"
 	Harmony        = "Harmony"
+	WebOS          = "webOS"
+	Tizen          = "Tizen"
+	SmartTVOS      = "SmartTV"
 
 	Opera            = "Opera"
 	OperaMini        = "Opera Mini"
@@ -54,6 +57,8 @@ const (
 	Mozilla          = "Mozilla"
 	Msie             = "MSIE"
 	SamsungBrowser   = "Samsung Browser"
+	LGBrowser        = "LG Browser"
+	MiTVBrowser      = "Mi TV Browser"
 
 	GoogleAdsBot        = "Google Ads Bot"
 	Googlebot           = "Googlebot"
@@ -86,6 +91,20 @@ func Parse(userAgent string) UserAgent {
 
 	// OS lookup
 	switch {
+	// Smart TV OS detection - check these first
+	case tokens.exists("Web0S"), tokens.exists("WebOS"):
+		ua.OS = WebOS
+		if version := tokens.get("Web0S"); version != "" {
+			ua.OSVersion = version
+		} else {
+			ua.OSVersion = tokens.get("WebOS")
+		}
+		ua.Device = "Smart TV"
+
+	case tokens.exists("SmartTV"):
+		ua.OS = SmartTVOS
+		ua.Device = "Smart TV"
+
 	case tokens.exists(Android):
 		ua.OS = Android
 		var osIndex int
@@ -120,6 +139,7 @@ func Parse(userAgent string) UserAgent {
 		ua.OSVersion = tokens.findMacOSVersion()
 		ua.Desktop = true
 
+	// Smart TV OS detection (Tizen detection is handled later, starting at line 170)
 	case tokens.exists(Linux):
 		ua.OS = Linux
 		ua.OSVersion = tokens.get(Linux)
@@ -147,6 +167,56 @@ func Parse(userAgent string) UserAgent {
 	}
 
 	switch {
+	case isSmartTVDevice(ua.String):
+		uaString := ua.String
+		ua.Device = "Smart TV"
+
+		// Determine Smart TV type and set appropriate properties
+		if isAmazonFireTV(uaString) {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = "Amazon Fire TV Browser"
+			ua.Version = tokens.get("Chrome")
+		} else if isAndroidTVBox(uaString) {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = "Android TV Browser"
+			// Handle both Chrome-based and Firefox-based Android TV devices
+			if chromeVersion := tokens.get("Chrome"); chromeVersion != "" {
+				ua.Version = chromeVersion
+			} else if firefoxVersion := tokens.get("Firefox"); firefoxVersion != "" {
+				ua.Version = firefoxVersion
+			}
+		} else if strings.Contains(uaString, "Chromecast") {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = "Chromecast"
+			ua.Version = tokens.get("Chrome")
+		} else if strings.Contains(uaString, "MiTV-AFKR0") {
+			ua.OS = Android
+			ua.OSVersion = tokens.get("Android")
+			ua.Name = MiTVBrowser
+			ua.Version = tokens.get("Chrome")
+		} else if strings.Contains(uaString, "SMART-TV") && strings.Contains(uaString, "Tizen") {
+			ua.OS = Tizen
+			ua.OSVersion = tokens.get("Tizen")
+			ua.Name = "Samsung TV Browser"
+			if tokens.exists("SamsungBrowser") {
+				ua.Version = tokens.get("SamsungBrowser")
+			} else {
+				// Handle newer Tizen format like "108.0.5359.1/8.0"
+				// Extract version from user agent string using pre-compiled regex pattern
+				// Pattern matches: version.x.x.x/x.x format (e.g., "108.0.5359.1/8.0")
+				// Group 1 captures: \d+\.\d+\.\d+\.\d+ (the version number before the slash)
+				matches := rxTizenVersion.FindStringSubmatch(ua.String)
+				if len(matches) >= 2 {
+					ua.Version = matches[1]
+				}
+			}
+		}
+		// Skip the rest of browser detection
+		return ua
+
 	case tokens.exists(Googlebot):
 		ua.Name = Googlebot
 		ua.Version = tokens.get(Googlebot)
@@ -305,6 +375,11 @@ func Parse(userAgent string) UserAgent {
 		ua.Name = "Huawei Browser"
 		ua.Version = tokens.get("HuaweiBrowser")
 		ua.Mobile = tokens.existsAny(Mobile, MobileSafari)
+
+	case tokens.get("LG Browser") != "":
+		ua.Name = LGBrowser
+		ua.Version = tokens.get("LG Browser")
+		ua.Device = "Smart TV"
 
 	case tokens.exists(BlackBerry):
 		ua.Name = BlackBerry
@@ -658,6 +733,9 @@ func (p properties) findBestMatch(withVerOnly bool) string {
 
 var rxMacOSVer = regexp.MustCompile(`[_\d\.]+`)
 
+// rxTizenVersion extracts version from Tizen format like "108.0.5359.1/8.0"
+var rxTizenVersion = regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)/\d+\.\d+`)
+
 func findVersion(s string) string {
 	if ver := rxMacOSVer.FindString(s); ver != "" {
 		return strings.Replace(ver, "_", ".", -1)
@@ -688,4 +766,60 @@ func (p *properties) findAndroidDevice(startIndex int) string {
 		}
 	}
 	return ""
+}
+
+// isSmartTVDevice checks if the user agent string contains patterns indicating a Smart TV device
+func isSmartTVDevice(userAgent string) bool {
+	smartTVPatterns := []string{
+		"AFTSSS",     // Amazon Fire TV Stick
+		"AFTBOXE1",   // Amazon Fire TV Box
+		"AFTGAZL",    // Amazon Fire TV Cube
+		"OLED TV",    // Sony OLED TV
+		"Chromecast", // Google Chromecast
+		"MiTV-AFKR0", // Xiaomi Mi TV
+		"H96 Max",    // H96 Max Android TV box
+		"RK3318",     // Rockchip RK3318 Android TV box
+	}
+
+	// Check for individual Smart TV patterns
+	for _, pattern := range smartTVPatterns {
+		if strings.Contains(userAgent, pattern) {
+			return true
+		}
+	}
+
+	// Check for Tizen Smart TVs
+	return strings.Contains(userAgent, "SMART-TV") && strings.Contains(userAgent, "Tizen")
+}
+
+// isAmazonFireTV checks if the user agent string indicates an Amazon Fire TV device
+func isAmazonFireTV(userAgent string) bool {
+	fireTVPatterns := []string{
+		"AFTSSS",   // Amazon Fire TV Stick
+		"AFTBOXE1", // Amazon Fire TV Box
+		"AFTGAZL",  // Amazon Fire TV Cube
+	}
+
+	for _, pattern := range fireTVPatterns {
+		if strings.Contains(userAgent, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
+// isAndroidTVBox checks if the user agent string indicates an Android TV box device
+func isAndroidTVBox(userAgent string) bool {
+	androidTVPatterns := []string{
+		"OLED TV", // Sony OLED TV
+		"H96 Max", // H96 Max Android TV box
+		"RK3318",  // Rockchip RK3318 Android TV box
+	}
+
+	for _, pattern := range androidTVPatterns {
+		if strings.Contains(userAgent, pattern) {
+			return true
+		}
+	}
+	return false
 }
